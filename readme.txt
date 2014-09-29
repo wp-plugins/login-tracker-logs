@@ -1,11 +1,11 @@
 ﻿=== Login Tracker Logs ===
-Tags: track, login, attempt, ip, attempts
-License: GPLv2
-Requires at least: 2.7
-Tested up to: 3.5
-Stable tag: 1.1
+Contributors: selnomeria
 Author: selnomeria
-
+Tags: track, login, attempt, ip, attempts
+Requires at least: 3.0
+Tested up to: 3.9
+Stable tag: 1.0.1
+License: Free
 Track successful logins and even COUNTRY of logged user(IP).
 
 
