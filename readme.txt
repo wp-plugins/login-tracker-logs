@@ -4,6 +4,7 @@ License: GPLv2
 Requires at least: 2.7
 Tested up to: 3.5
 Stable tag: 1.1
+Author: selnomeria
 
 Track successful logins and even COUNTRY of logged user(IP).
 
