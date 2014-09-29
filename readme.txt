@@ -14,10 +14,6 @@ Track successful logins and even COUNTRY of logged user(IP).
 After plugin activation, go to  "Dashboard"->"Settings"->"Login Tracks".
 
 
-= Usage =
-
-1. Download and extract archive to `wp-content/plugins/`
-2. Activate the plugin through the 'Plugins' menu in WordPress.
 
 Related Links:
 
