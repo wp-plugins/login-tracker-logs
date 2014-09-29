@@ -2,7 +2,7 @@
 /*
 Plugin Name: Login Tracker Logs
 Plugin URI:
-Description: Logs successful logins  (To deny access to WP-LOGIN only to selected IP's, then see - http://codesphpjs.blogspot.com/2014/09/allow-wp-login-only-to-specific-ips.html )
+Description: Logs and View successful logins with Country Names of that IP!!! also, enable mail notifications for Unknown IPs, or even DISABLE THEM! 
 Version: 1.1
 Author: selnomeria
 Author URI: http://codesphpjs.blogspot.com
