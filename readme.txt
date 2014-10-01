@@ -6,7 +6,7 @@ Tested up to: 3.9
 Stable tag: 1.1
 License: Free
 
-Track logins (username + IP)  and their COUNTRY/CITY as well.  Also, send nofitication to admin, when unknown user logins +  allow login only to  specific IPs.
+Track logins (username + IP+COUNTRY+CITY).  Also, send nofitication to admin, when unknown user logins =OR= allow login only to specific IPs.
 
 
 == Description ==
