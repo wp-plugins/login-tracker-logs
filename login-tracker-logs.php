@@ -2,7 +2,7 @@
 /*
 Plugin Name: Login Tracker Logs
 Plugin URI:
-Description: Logs and View successful logins with Country Names of that IP!!! also, enable mail notifications for Unknown IPs, or even DISABLE THEM! 
+Description: Track logins (username + IP)  and their COUNTRY/CITY as well.  Also, send nofitication to admin, when unknown user logins +  allow login only to  specific IPs.
 Version: 1.1
 Author: selnomeria
 */
