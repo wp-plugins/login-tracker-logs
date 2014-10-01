@@ -5,9 +5,8 @@ Plugin URI:
 Description: Logs and View successful logins with Country Names of that IP!!! also, enable mail notifications for Unknown IPs, or even DISABLE THEM! 
 Version: 1.1
 Author: selnomeria
-Author URI: http://codesphpjs.blogspot.com
 */
-//include_once(dirname(__file__).'/trunk/login-tracker-logs.php');
+
 
 $newlgs= new Login_Tracker_logs;
 class Login_Tracker_logs 
@@ -107,15 +106,14 @@ class Login_Tracker_logs
 			$creds['remember']		= $_POST['rememberme'];
 			$user = wp_signon( $creds, false );
 			
+			
+			//=================INSERT IN DATABASE===============
 			if ( !is_wp_error($user) )
 			{
-				//INSERT IN DATABASE
+				//if remote whois NOT ENABLED
 				if (get_option('lgs_enable_WHOIS') != 'yes' ) 
 				{
-					include( dirname(__file__)."/ip_country_data_2014/geoip.inc" );
-					$gi = geoip_open(dirname(__file__)."/ip_country_data_2014/GeoIP.dat", GEOIP_STANDARD); 
-					$country_name = geoip_country_name_by_addr($gi, $user_ip );
-					geoip_close($gi);
+					include( dirname(__file__)."/ip_country_data_2014/sample-test.php" );
 					$ip_country = $country_name;
 				}
 				else
