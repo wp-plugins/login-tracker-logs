@@ -134,7 +134,7 @@ class Login_Tracker_logs
 						
 						$admin_mail	= get_option('admin_email');
 						$subjectt	="UNKNOWN IP($user_ip) has logged into $siteURL ";
-						$full_messag="\r\n\r\n Someone with an IP $user_ip has logged into your site. \r\n\r\n (if you know him, you can add him to whitelist $adminURL";
+						$full_messag="\r\n\r\n Someone with an IP $user_ip (COUNTRY:$ip_country) has logged into your site. \r\n\r\n (if you know him, you can add him to whitelist $adminURL";
 						// To send HTML mail, the Content-type header must be set
 						$headers  = "MIME-Version: 1.0\r\n";
 						$headers .= "Content-type: text/html\r\n";
