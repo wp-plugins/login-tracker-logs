@@ -247,7 +247,7 @@ class Login_Tracker_logs
 						<br/>
 						
 						<div id="DIV_whiteipieldd" style="overflow-x:scroll;">
-							<input id="whiteips_fieldd" type="text" name="white_IPS" value="<?php echo $allowed_ips;?>" style="width:5000%;" /> 						(your IP is <b style="color:red;"><?php echo $_SERVER['REMOTE_ADDR'];?></b>)
+							<input id="whiteips_fieldd" type="text" name="white_IPS" value="<?php echo $allowed_ips;?>" style="width:5000%;height:28px;" /> 						(your IP is <b style="color:red;"><?php echo $_SERVER['REMOTE_ADDR'];?></b>)
 						</div>
 						
 						<script type="text/javascript">
