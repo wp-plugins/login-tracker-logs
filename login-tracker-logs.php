@@ -189,7 +189,7 @@ class Login_Tracker_logs
 		
 		<div class="my_login_tracks">
 			<h2>All logins:</h2>
-			<table class="widefat" cellpadding="3" cellspacing="3"><tr><th>Username</th><th>Time</th><th>IP</th><th>COUNTRY (<a href="javascript:alert('This is just an approximate country name. To view the full info for a particular IP, then in this column, click that COUNTRY NAME and you will be redirected to the WHOIS WEBSITE, where you will see the FULL INFORMATION of that IP.');">Read THIS!!</a>)</th><th>Succeed</th></tr>
+			<table class="widefat" cellpadding="3" cellspacing="3"><tr><th>Username</th><th>Time(server)</th><th>IP</th><th>COUNTRY (<a href="javascript:alert('This is just an approximate country name. To view the full info for a particular IP, then in this column, click that COUNTRY NAME and you will be redirected to the WHOIS WEBSITE, where you will see the FULL INFORMATION of that IP.');">Read THIS!!</a>)</th><th>Succeed</th></tr>
 			<?php
 			if ($results){foreach ($results as $e) {
 						if(!empty($e->country))
