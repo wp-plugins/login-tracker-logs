@@ -238,7 +238,7 @@ class Login_Tracker_logs
 					-->
 					
 					
-					<div class="white_list_ipps" style="background-color: #1EE41E;padding: 5px;float: left; margin:0 0 0 20%;">
+					<div class="white_list_ipps" style="background-color: #1EE41E;padding: 5px;float: left; margin:0 0 0 20%;width: 70%;">
 						IP WHITELISTING setting: (<a href="javascript:alert('If this option will be enabled, then, in the field,you can enter the confident IPs (separated by comma). \r\n\r\n  You can choose:\r\n1) get MAIL NOTIFICATION (at <?php echo get_option('admin_email');?>, changeable from Settings>General. But on localhost mail doesnt work) when anyone logins, whose IP is not in this list. \r\n2) Block anyone to access LOGIN page at all [whose IP is not in the list]. \r\r\n(DONT FORGET TO INSERT YOUR IP TOO! HOWEVER,IF YOU BLOCK YOURSELF,enter FTP and add your IP into this file: wp-content/plugins/<?php echo basename(dirname(__file__));?>/ALLOWED_IPS)\r\n');">read more!!</a>):
 						&nbsp;&nbsp;&nbsp;&nbsp;
 						&nbsp;OFF<input onclick="lg_radiod();" type="radio" name="whitelist_ips" value="1" <?php echo $d1;?> />
@@ -246,8 +246,8 @@ class Login_Tracker_logs
 						&nbsp;Block anyone, except them<input onclick="lg_radiod();" type="radio" name="whitelist_ips" value="3" <?php echo $d3;?> />
 						<br/>
 						
-						<div id="DIV_whiteipieldd">
-							<input id="whiteips_fieldd" type="text" name="white_IPS" value="<?php echo $allowed_ips;?>" style="width:1000%;" /> 						(your IP is <b style="color:red;"><?php echo $_SERVER['REMOTE_ADDR'];?></b>)
+						<div id="DIV_whiteipieldd" style="overflow-x:scroll;">
+							<input id="whiteips_fieldd" type="text" name="white_IPS" value="<?php echo $allowed_ips;?>" style="width:5000%;" /> 						(your IP is <b style="color:red;"><?php echo $_SERVER['REMOTE_ADDR'];?></b>)
 						</div>
 						
 						<script type="text/javascript">
