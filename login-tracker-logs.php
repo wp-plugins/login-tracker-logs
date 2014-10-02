@@ -16,6 +16,7 @@ class Login_Tracker_logs
 	public function __construct()
 	{
 	register_activation_hook( __FILE__,  array($this, 'lgs_install'));
+	register_deactivation_hook( __FILE__,  array($this, 'lgs_uninstall'));
 	// run it before the headers and cookies are sent
 	add_action( 'after_setup_theme', array($this, 'lgs_login_checker'));
 	//add page under SETTINGS
@@ -39,7 +40,10 @@ class Login_Tracker_logs
 			)  ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ; ") or die("error_2345_". mysql_error().$logintracks_tname);
 	}
 
-	
+	public function lgs_uninstall()
+	{
+		unlink($this->allowed_ipss_file());
+	}	
 	
 	
 	public function get_remote_data($url, $from_mobile=false , $post_request=false, $post_paramtrs=false )	
@@ -60,7 +64,9 @@ class Login_Tracker_logs
 	
 	public function allowed_ipss_file()
 	{
-		return  dirname(__FILE__).'/ALLOWED_IPS.php';
+		$allw_ips_file = ABSPATH.'/ALLOWED_IPs_FOR_LOGIN.php';
+		if (!file_exists($allw_ips_file)) {file_put_contents($allw_ips_file,"101.101.101.101 (its James my friend),102.102.102.102(This is Patrik),");}
+		return $allw_ips_file;
 	}
 
 
