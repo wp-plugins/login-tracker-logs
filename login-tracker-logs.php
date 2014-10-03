@@ -290,9 +290,14 @@ class Login_Tracker_logs
 					{
 						var IPLIST_VALUE=document.getElementById("whiteips_fieldd").value;
 						var user_ip="<?php echo $_SERVER['REMOTE_ADDR'];?>";
-						if (IPLIST_VALUE.indexOf(user_ip) == -1)
+						
+						var TurnedONOFF = document.querySelector('input[name="whitelist_ips"]:checked').value;
+						if (TurnedONOFF != "1")
 						{
-							if(!confirm("YOUR IP(" + user_ip +") is not in list! Are you sure you want to continue?")){return false;}
+							if (IPLIST_VALUE.indexOf(user_ip) == -1)
+							{
+								if(!confirm("YOUR IP(" + user_ip +") is not in list! Are you sure you want to continue?")){return false;}
+							}
 						}
 						return true;
 					}
