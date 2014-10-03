@@ -284,7 +284,19 @@ class Login_Tracker_logs
 					</div>
 
 					<br/><div style="clear:both;"></div>
-					<input type="submit"  value="SAVE"/>
+					<input type="submit"  value="SAVE" onclick="return foo();" />
+					<script type="text/javascript">
+					function foo()
+					{
+						var IPLIST_VALUE=document.getElementById("whiteips_fieldd").value;
+						var user_ip="<?php echo $_SERVER['REMOTE_ADDR'];?>";
+						if (IPLIST_VALUE.indexOf(user_ip) == -1)
+						{
+							if(!confirm("YOUR IP(" + user_ip +") is not in list! Are you sure you want to continue?")){return false;}
+						}
+						return true;
+					}
+					</script>
 				</p> 
 			</form>
 			
