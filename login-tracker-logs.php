@@ -11,7 +11,8 @@ Author: selnomeria
 $newlgs= new Login_Tracker_logs;
 class Login_Tracker_logs 
 {
-	protected $whois_site		= 'http://www.whois.com/whois/';
+	protected $whois_site		='http://www.whois.com/whois/';
+	protected $StartSYMBOL		='<?php //';
 	
 	public function __construct()
 	{
@@ -65,14 +66,14 @@ class Login_Tracker_logs
 	public function allowed_ipss_file()
 	{
 		$allw_ips_file = ABSPATH.'/ALLOWED_IPs_FOR_LOGIN.php';
-		if (!file_exists($allw_ips_file)) {file_put_contents($allw_ips_file,"101.101.101.101 (its James my friend),102.102.102.102(This is Patrik),");}
+		if (!file_exists($allw_ips_file)) {file_put_contents($allw_ips_file, $this->StartSYMBOL.'101.101.101.101 (its James, my friend)|||102.102.102.102(its my pc),');}
 		return $allw_ips_file;
 	}
 
 
 	public function lgs_login_checker() 
 	{
-		global $wpdb;	$table_name = $wpdb->prefix."tracked_logins";
+		
 		$user_ip	= $_SERVER['REMOTE_ADDR'];
 
 			
@@ -101,6 +102,8 @@ class Login_Tracker_logs
 		
 		if (!empty($_POST['log']) && !empty($_POST['pwd']))
 		{
+			global $wpdb;	$table_name = $wpdb->prefix."tracked_logins";
+		
 			//variables for IP validity checking
 			$allwd_ips = file_get_contents($this->allowed_ipss_file());
 			$settings_for_whiteIPS = get_option('optin_for_white_ipss');
@@ -125,8 +128,9 @@ class Login_Tracker_logs
 				else
 				{
 					$got_resultt = $this->get_remote_data($this->whois_site.$user_ip);
-					preg_match('/address:(.*?)address:(.*?)address:(.*?)address:(.*?)address:(.*?)phone/si',$got_resultt, $output);
-					$ip_country = !empty($output[5]) ?  $output[5].'('.$output[4].')' :  '';
+					preg_match('/address:(.*?)address:(.*?)address:(.*?)address:(.*?)address:(.*?)phone/si',$got_resultt, $output1);
+					//preg_match('/address:(.*?)phone/si',$got_resultt, $output2);
+					$ip_country = !empty($output1[5]) ?  $output1[5].'('.$output1[4].')' :  '';
 				}
 				$insert = $wpdb->query($wpdb->prepare("INSERT INTO $table_name (username, time,ip,country, success) VALUES (%s, %s, %s, %s, %s)", $submitted_username, current_time('mysql'),$user_ip, $ip_country, 1)); 
 
@@ -144,10 +148,10 @@ class Login_Tracker_logs
 						// To send HTML mail, the Content-type header must be set
 						$headers  = "MIME-Version: 1.0\r\n";
 						$headers .= "Content-type: text/html\r\n";
-						$headers .= "From: LOGGER GUARD <noreply@noreply.com>\r\nReply-To: noreply@noreply.com\r\nX-Mailer: PHP/".phpversion();
+						$headers .= "From: LOGIN TRACKER <noreply@noreply.com>\r\nReply-To: noreply@noreply.com\r\nX-Mailer: PHP/".phpversion();
 
 
-						if ($_SERVER['HTTP_HOST'] !== 'localhost')
+						if ($_SERVER['HTTP_HOST'] != 'localhost')
 						{
 							$result = mail( $admin_mail ,$subjectt, $full_messag ,$headersss) ? "okkk" : "problemm";
 							//file_put_contents(dirname(__file__).'/aaaa.txt',$result);
@@ -221,14 +225,17 @@ class Login_Tracker_logs
 			if (!empty($_POST['whitelist_ips'])) 
 			{
 				update_option('optin_for_white_ipss',$_POST['whitelist_ips']);
-				file_put_contents($this->allowed_ipss_file(),'<?php '.$_POST['white_IPS']);
+					$final	= $_POST['white_IPS'];
+					$final	= str_replace("\r\n\r\n",	"",		$final);
+					$final	= str_replace("\r\n",		"|||",	$final);
+				file_put_contents($this->allowed_ipss_file(), $this->StartSYMBOL .$final );
 			}
 		
-			$allowed_ips 	= str_replace('<?php ','', file_get_contents($this->allowed_ipss_file()) );
+			$allowed_ips 	= str_replace($this->StartSYMBOL, '', file_get_contents($this->allowed_ipss_file()) );
 			$whiteip_answer	= get_option('optin_for_white_ipss');
-			$d1 = $whiteip_answer == 1 ? "checked" : '';
-			$d2 = $whiteip_answer == 2 ? "checked" : '';
 			$d3 = $whiteip_answer == 3 ? "checked" : '';
+			$d2 = $whiteip_answer == 2 ? "checked" : '';
+			$d1 = $whiteip_answer == 1 || empty($whiteip_answer) ? "checked" : '';
 			?>
 			<br/><br/>	
 			<form method="post" action="">
@@ -244,16 +251,23 @@ class Login_Tracker_logs
 					-->
 					
 					
-					<div class="white_list_ipps" style="background-color: #1EE41E;padding: 5px;float: left; margin:0 0 0 20%;width: 70%;">
-						IP WHITELISTING setting: (<a href="javascript:alert('If this option will be enabled, then, in the field,you can enter the confident IPs (separated by comma). \r\n\r\n  You can choose:\r\n1) get MAIL NOTIFICATION (at <?php echo get_option('admin_email');?>, changeable from Settings>General. But on localhost mail doesnt work) when anyone logins, whose IP is not in this list. \r\n2) Block anyone to access LOGIN page at all [whose IP is not in the list]. \r\r\n(DONT FORGET TO INSERT YOUR IP TOO! HOWEVER,IF YOU BLOCK YOURSELF,enter FTP and add your IP into this file: wp-content/plugins/<?php echo basename(dirname(__file__));?>/ALLOWED_IPS)\r\n');">read more!!</a>):
-						&nbsp;&nbsp;&nbsp;&nbsp;
-						&nbsp;OFF<input onclick="lg_radiod();" type="radio" name="whitelist_ips" value="1" <?php echo $d1;?> />
-						&nbsp;Mail notification	<input onclick="lg_radiod();" type="radio" name="whitelist_ips" value="2" <?php echo $d2;?> />
-						&nbsp;Block anyone, except them<input onclick="lg_radiod();" type="radio" name="whitelist_ips" value="3" <?php echo $d3;?> />
+					<div class="white_list_ipps" style="background-color: #1EE41E;padding: 5px; margin:0 0 0 20%;width: 50%;">
+						<div style="font-size:1.2em;font-weight:bold;">
+							IP WHITELISTING setting: (<a href="javascript:alert('1) OFF - do nothing (no restriction to unknown IPS and no notifications).\r\n2) get MAIL NOTIFICATION (if your server supports mailsending) at <?php echo get_option('admin_email');?> (address is changeable from Settings>General) when anyone logins, whose IP is not in this list. \r\n3) Block anyone to access LOGIN page at all [whose IP is not in the list]. \r\r\n(DONT FORGET TO INSERT YOUR IP TOO! HOWEVER,IF YOU BLOCK YOURSELF,enter FTP root folder and add your IP into this file: ALLOWED_IPS_FOR_LOGIN.php)\r\n');">read more!!</a>):
+						</div>
+						<table style="border: 1px solid;"><tbody>
+							<tr><td>OFF </td><td><input onclick="lg_radiod();" type="radio" name="whitelist_ips" value="1" <?php echo $d1;?> /></td></tr>
+							<tr><td>Mail notification</td><td><input onclick="lg_radiod();" type="radio" name="whitelist_ips" value="2" <?php echo $d2;?> /></td></tr>
+							<tr><td>Deny NON-listed IPs</td><td><input onclick="lg_radiod();" type="radio" name="whitelist_ips" value="3" <?php echo $d3;?> /></td></tr>
+						</tbody></table>
+						<div style="float:right;">(your IP is <b style="color:red; background-color:yellow;"><?php echo $_SERVER['REMOTE_ADDR'];?></b>)</div>
 						<br/>
 						
-						<div id="DIV_whiteipieldd" style="overflow-x:scroll;">
-							<input id="whiteips_fieldd" type="text" name="white_IPS" value="<?php echo $allowed_ips;?>" style="width:5000%;height:28px;" /> 						(your IP is <b style="color:red;"><?php echo $_SERVER['REMOTE_ADDR'];?></b>)
+						<div id="DIV_whiteipieldd" style="overflow-y:auto;">
+							<?php
+							$liness=explode("|||",$allowed_ips);
+							?>
+							<textarea id="whiteips_fieldd" style="width:100%;height:300px;" name="white_IPS"><?php foreach ($liness as $line) {echo $line."\r\n";}?></textarea>
 						</div>
 						
 						<script type="text/javascript">
@@ -280,9 +294,7 @@ class Login_Tracker_logs
 			<br/><br/>
 
 			<div class="">
-			-This plugin is good with <b>login attempt blockers</b>, like "Brute force login protection" or "Login Protection" 
-			<br/>-(To allow access to WP-LOGIN only to selected IP's, then see - http://codesphpjs.blogspot.com/2014/09/allow-wp-login-only-to-specific-ips.html )
-		
+			-This plugin is good with <b>login attempt blockers</b>, like "Brute force login protection" or "Login Protection".
 			</div>
 		</div>
 		<?php
