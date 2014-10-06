@@ -224,7 +224,9 @@ class Login_Tracker_logs
 			//IF whitelist updated
 			if (!empty($_POST['whitelist_ips'])) 
 			{
+				//update setting
 				update_option('optin_for_white_ipss',$_POST['whitelist_ips']);
+				//change IP file
 					$final	= $_POST['white_IPS'];
 					$final	= str_replace("\r\n\r\n",	"",		$final);
 					$final	= str_replace("\r\n",		"|||",	$final);
