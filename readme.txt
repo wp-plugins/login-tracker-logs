@@ -1,4 +1,4 @@
-﻿=== Login Tracker Logs ===
+﻿=== Login Restrict Logs ===
 Contributors: selnomeria
 Tags: track, login, attempt, ip, attempts, logins, restrict, disable
 Requires at least: 3.0

@@ -1,15 +1,15 @@
 <?php
 /*
-Plugin Name: Login Tracker Logs
+Plugin Name: Login Restrict Logs
 Plugin URI:
-Description: Track logins (username + IP)  and their COUNTRY/CITY as well.  Also, send nofitication to admin, when unknown user logins +  allow login only to  specific IPs.
+Description: Track logins (username + IP)  and their COUNTRY/CITY as well.  Also, send nofitication to admin, when unknown user logins +  allow login only to specific IPs.
 Version: 1.1
 Author: selnomeria
 */
 
 
-$newlgs= new Login_Tracker_logs;
-class Login_Tracker_logs 
+$newlgs= new Login_Restrict_logs;
+class Login_Restrict_logs 
 {
 	protected $whois_site		='http://www.whois.com/whois/';
 	protected $StartSYMBOL		='<?php //';
@@ -27,7 +27,7 @@ class Login_Tracker_logs
 	
 	public function lgs_install()
 	{
-		global $wpdb;	$table_name = $wpdb->prefix."tracked_logins";
+		global $wpdb;	$table_name = $wpdb->prefix."restrictor_logins";
 		$create_table = $wpdb->query("CREATE TABLE IF NOT EXISTS `$table_name` (
 			  `id` int(50) NOT NULL AUTO_INCREMENT,
 			  `username` varchar(150) CHARACTER SET utf8 NOT NULL,
@@ -43,9 +43,13 @@ class Login_Tracker_logs
 
 	public function lgs_uninstall()
 	{
-		//unlink($this->allowed_ipss_file());
+		unlink($this->allowed_ipss_file());
 	}	
 	
+	public function domainn()
+	{
+		return str_replace('www.','', $_SERVER['HTTP_HOST']);
+	}	
 	
 	public function get_remote_data($url, $from_mobile=false , $post_request=false, $post_paramtrs=false )	
 	{
@@ -65,34 +69,32 @@ class Login_Tracker_logs
 	
 	public function allowed_ipss_file()
 	{
-		$pt_folder = ABSPATH.'/ALLOWED_IP/'. str_replace('wwww.','', $_SERVER['HTTP_HOST']);
-			if(!file_exists($pt_folder)) {mkdir($pt_folder, 0755, true);}
-		$allw_ips_file = $pt_folder .'/ALLOWED_IPS_FOR_WP_LOGIN.php';
-		if (!file_exists($allw_ips_file)) {file_put_contents($allw_ips_file, $this->StartSYMBOL.'101.101.101.101 (its James, my friend)|||102.102.102.102(its my pc),');}
-		return $allw_ips_file;
+		//initial values
+		$bakcup_of_ipfile = get_option("backup_allowed_ips_login_". $this->domainn() );
+		$Value = !empty($bakcup_of_ipfile)?  $bakcup_of_ipfile : $this->StartSYMBOL. '101.101.101.101 (its James, my friend)|||102.102.102.102(its my pc),';
+		
+		//file path
+		$pt_folder = ABSPATH.'/ALLOWED_IP/'. $this->domainn();		if(!file_exists($pt_folder)){mkdir($pt_folder, 0755, true);}
+		$file = $pt_folder .'/ALLOWED_IPs_FOR_WP_LOGIN.php';		if(!file_exists($file))		{file_put_contents($file, $Value);}
+		return $file;
 	}
 
 
 	public function lgs_login_checker() 
 	{
-		
-		$user_ip	= $_SERVER['REMOTE_ADDR'];
-
-			
 		//====================only when WP-LOGIN.PAGE is accessed. otherwise, the function will slower all normal page loads=======
 		//check if he is disabled
 		if (strpos($_SERVER['REQUEST_URI'],'/wp-login.php') !== false )
 		{
 			//variables for IP validity checking
-			$allwd_ips = file_get_contents($this->allowed_ipss_file());
-			$settings_for_whiteIPS = get_option('optin_for_white_ipss');
+			$allwd_ips_content = file_get_contents($this->allowed_ipss_file());
 		
 			//check if BLOCKED
-			if (strpos($allwd_ips,$user_ip) === false)
+			if (strpos($allwd_ips_content, $_SERVER['REMOTE_ADDR']) === false)
 			{
-				if ($settings_for_whiteIPS == 3)
+				if (get_option('optin_for_white_ipss') == 3)
 				{
-					die("Login is disabled. Your IP is: ".$user_ip);
+					die("Login is disabled. Your IP is: ". $_SERVER['REMOTE_ADDR']);
 				}
 			}
 		}
@@ -104,11 +106,11 @@ class Login_Tracker_logs
 		
 		if (!empty($_POST['log']) && !empty($_POST['pwd']))
 		{
-			global $wpdb;	$table_name = $wpdb->prefix."tracked_logins";
+			global $wpdb;	$table_name = $wpdb->prefix."restrictor_logins";
 		
 			//variables for IP validity checking
 			$allwd_ips = file_get_contents($this->allowed_ipss_file());
-			$settings_for_whiteIPS = get_option('optin_for_white_ipss');
+			$user_ip	= $_SERVER['REMOTE_ADDR'];
 		
 			$submitted_username = sanitize_text_field(esc_attr($_POST['log']));
 			$creds = array();
@@ -139,7 +141,7 @@ class Login_Tracker_logs
 				//CHECK IP (BLOCK or Send notification)
 				if (strpos($allwd_ips,$user_ip) === false)
 				{
-					if ($settings_for_whiteIPS == 2)
+					if (get_option('optin_for_white_ipss') == 2)
 					{
 						$siteURL = home_url();
 						$adminURL= admin_url('options-general.php?page=lgs-submenu-page');
@@ -150,7 +152,7 @@ class Login_Tracker_logs
 						// To send HTML mail, the Content-type header must be set
 						$headers  = "MIME-Version: 1.0\r\n";
 						$headers .= "Content-type: text/html\r\n";
-						$headers .= "From: LOGIN TRACKER <noreply@noreply.com>\r\nReply-To: noreply@noreply.com\r\nX-Mailer: PHP/".phpversion();
+						$headers .= "From: LOGIN RESTRICT <noreply@noreply.com>\r\nReply-To: noreply@noreply.com\r\nX-Mailer: PHP/".phpversion();
 
 
 						if ($_SERVER['HTTP_HOST'] != 'localhost')
@@ -166,11 +168,11 @@ class Login_Tracker_logs
 
 
 
-	public function logintrackss_funcct(){	add_submenu_page('options-general.php','LOGIN Tracks','LOGIN Tracks', 'manage_options' ,'lgs-submenu-page', array($this, 'lgs_page_callback') );}
+	public function logintrackss_funcct(){	add_submenu_page('options-general.php','LOGIN Restricts','LOGIN Restricts', 'manage_options' ,'lgs-submenu-page', array($this, 'lgs_page_callback') );}
 	//output of page
 	public function lgs_page_callback()
 	{
-		global $wpdb;	$table_name = $wpdb->prefix . "tracked_logins";
+		global $wpdb;	$table_name = $wpdb->prefix . "restrictor_logins";
 		//if records cleared
 		if ($_POST['logintracks_clear']=='true') 
 		{
@@ -197,10 +199,10 @@ class Login_Tracker_logs
 			<h2>All logins:</h2>
 			<table class="widefat" cellpadding="3" cellspacing="3"><tr><th>Username</th><th>Time(server)</th><th>IP</th><th>COUNTRY (<a href="javascript:alert('This is just an approximate country name. To view the full info for a particular IP, then in this column, click that COUNTRY NAME and you will be redirected to the WHOIS WEBSITE, where you will see the FULL INFORMATION of that IP.');">Read THIS!!</a>)</th><th>Succeed</th></tr>
 			<?php
-			if ($results){foreach ($results as $e) {
-						if(!empty($e->country))
-							 {$countryyy =  '<a href="'. $this->whois_site . $e->IP.'" target="_blank">'.$e->country.'</a>';}
-						else {$countryyy =  '<a href="'. $this->whois_site . $e->IP.'" target="_blank">problem_54_from_plugin</a>';}
+			if ($results){
+				foreach ($results as $e) {
+						if(!empty($e->country))	 {$countryyy =  '<a href="'. $this->whois_site . $e->IP.'" target="_blank"> '.$e->country.'</a>';}
+						else 					 {$countryyy =  '<a href="'. $this->whois_site . $e->IP.'" target="_blank"> problem_54_from_plugin</a>';}
 		
 					echo '<tr class="succeed"><td>'.$e->username.'</td><td>'.$e->time.'</td><td>'.$e->IP.'</td><td>'.$countryyy.'</td><td>succeed<td></tr>';
 				}
@@ -233,6 +235,10 @@ class Login_Tracker_logs
 					$final	= str_replace("\r\n\r\n",	"",		$final);
 					$final	= str_replace("\r\n",		"|||",	$final);
 				file_put_contents($this->allowed_ipss_file(), $this->StartSYMBOL .$final );
+				
+				//make backup
+				update_option("backup_allowed_ips_login_". $this->domainn() ,  $this->StartSYMBOL .$final);
+				
 			}
 		
 			$allowed_ips 	= str_replace($this->StartSYMBOL, '', file_get_contents($this->allowed_ipss_file()) );
@@ -257,7 +263,7 @@ class Login_Tracker_logs
 					
 					<div class="white_list_ipps" style="background-color: #1EE41E;padding: 5px; margin:0 0 0 20%;width: 50%;">
 						<div style="font-size:1.2em;font-weight:bold;">
-							IP WHITELISTING setting: (<a href="javascript:alert('1) OFF - do nothing (no restriction to unknown IPS and no notifications).\r\n2) get MAIL NOTIFICATION (if your server supports mailsending) at <?php echo get_option('admin_email');?> (address is changeable from Settings>General) when anyone logins, whose IP is not in this list. \r\n3) Block anyone to access LOGIN page at all [whose IP is not in the list]. \r\r\n(DONT FORGET TO INSERT YOUR IP TOO! HOWEVER,IF YOU BLOCK YOURSELF,enter your wordpress directory (from FTP) and add your IP into this file: /ALLOWED_IP/ALLOWED_IPs_FOR_WP_LOGIN.php)\r\n');">read more!!</a>):
+							IP WHITELISTING setting: (<a href="javascript:alert('1) OFF - do nothing (no restriction to unknown IPS and no notifications).\r\n2) get MAIL NOTIFICATION (if your server supports mailsending) at <?php echo get_option('admin_email');?> (address is changeable from Settings>General) when anyone logins, whose IP is not in this list. \r\n3) Block anyone to access LOGIN page at all [whose IP is not in the list]. \r\r\n(DONT FORGET TO INSERT YOUR IP TOO! HOWEVER,IF YOU BLOCK YOURSELF,enter your wordpress directory (from FTP) and add your IP into this file: /ALLOWED_IP/ . otherwise delete this plugin.)\r\n');">read more!!</a>):
 						</div>
 						<table style="border: 1px solid;"><tbody>
 							<tr><td>OFF </td><td><input onclick="lg_radiod();" type="radio" name="whitelist_ips" value="1" <?php echo $d1;?> /></td></tr>
