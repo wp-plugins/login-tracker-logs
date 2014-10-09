@@ -43,7 +43,7 @@ class Login_Tracker_logs
 
 	public function lgs_uninstall()
 	{
-		unlink($this->allowed_ipss_file());
+		//unlink($this->allowed_ipss_file());
 	}	
 	
 	
@@ -65,7 +65,9 @@ class Login_Tracker_logs
 	
 	public function allowed_ipss_file()
 	{
-		$allw_ips_file = ABSPATH.'/ALLOWED_IPS_FOR_WP_LOGIN.php';
+		$pt_folder = ABSPATH.'/ALLOWED_IP/'. str_replace('wwww.','', $_SERVER['HTTP_HOST']);
+			if(!file_exists($pt_folder)) {mkdir($pt_folder, 0755, true);}
+		$allw_ips_file = $pt_folder .'/ALLOWED_IPS_FOR_WP_LOGIN.php';
 		if (!file_exists($allw_ips_file)) {file_put_contents($allw_ips_file, $this->StartSYMBOL.'101.101.101.101 (its James, my friend)|||102.102.102.102(its my pc),');}
 		return $allw_ips_file;
 	}
@@ -255,7 +257,7 @@ class Login_Tracker_logs
 					
 					<div class="white_list_ipps" style="background-color: #1EE41E;padding: 5px; margin:0 0 0 20%;width: 50%;">
 						<div style="font-size:1.2em;font-weight:bold;">
-							IP WHITELISTING setting: (<a href="javascript:alert('1) OFF - do nothing (no restriction to unknown IPS and no notifications).\r\n2) get MAIL NOTIFICATION (if your server supports mailsending) at <?php echo get_option('admin_email');?> (address is changeable from Settings>General) when anyone logins, whose IP is not in this list. \r\n3) Block anyone to access LOGIN page at all [whose IP is not in the list]. \r\r\n(DONT FORGET TO INSERT YOUR IP TOO! HOWEVER,IF YOU BLOCK YOURSELF,enter your wordpress directory (from FTP) and add your IP into this file: ALLOWED_IPS_FOR_WP_LOGIN.php)\r\n');">read more!!</a>):
+							IP WHITELISTING setting: (<a href="javascript:alert('1) OFF - do nothing (no restriction to unknown IPS and no notifications).\r\n2) get MAIL NOTIFICATION (if your server supports mailsending) at <?php echo get_option('admin_email');?> (address is changeable from Settings>General) when anyone logins, whose IP is not in this list. \r\n3) Block anyone to access LOGIN page at all [whose IP is not in the list]. \r\r\n(DONT FORGET TO INSERT YOUR IP TOO! HOWEVER,IF YOU BLOCK YOURSELF,enter your wordpress directory (from FTP) and add your IP into this file: /ALLOWED_IP/ALLOWED_IPs_FOR_WP_LOGIN.php)\r\n');">read more!!</a>):
 						</div>
 						<table style="border: 1px solid;"><tbody>
 							<tr><td>OFF </td><td><input onclick="lg_radiod();" type="radio" name="whitelist_ips" value="1" <?php echo $d1;?> /></td></tr>
