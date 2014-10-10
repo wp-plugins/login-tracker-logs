@@ -51,6 +51,13 @@ class Login_Restrict_logs
 		return str_replace('www.','', $_SERVER['HTTP_HOST']);
 	}	
 	
+	public function validate_pageload($value, $action_name)
+	{
+		if ( 	!isset($value) || !wp_verify_nonce($value, $action_name) ) {
+			die("not allowed due to interal_error_151");
+		}
+	}	
+	
 	public function get_remote_data($url, $from_mobile=false , $post_request=false, $post_paramtrs=false )	
 	{
 		$c = curl_init();
@@ -176,6 +183,8 @@ class Login_Restrict_logs
 		//if records cleared
 		if ($_POST['logintracks_clear']=='true') 
 		{
+			$this->validate_pageload($_POST['update_nonce'],'lo_clear');
+			
 			$wpdb->get_results("DELETE FROM ".$table_name." WHERE success='0' OR success='1'");
 		}
 		//if changed whois
@@ -215,6 +224,7 @@ class Login_Restrict_logs
 			<form method="post" action="">
 					<input type="hidden" name="logintracks_clear" value="true"/>
 					<input type="submit" name="logintracks_submit" value="Clean login data"/>
+					<input type="hidden" name="update_nonce" value="<?php echo wp_create_nonce('lo_clear');?>" />
 			</form>
 			<!-- ###clear records### -->		
 			
@@ -228,6 +238,8 @@ class Login_Restrict_logs
 			//IF whitelist updated
 			if (!empty($_POST['whitelist_ips'])) 
 			{
+				$this->validate_pageload($_POST['update_ips'],'lo_upd');
+				
 				//update setting
 				update_option('optin_for_white_ipss',$_POST['whitelist_ips']);
 				//change IP file
@@ -295,6 +307,7 @@ class Login_Restrict_logs
 
 					<br/><div style="clear:both;"></div>
 					<input type="submit"  value="SAVE" onclick="return foo();" />
+					<input type="hidden" name="update_ips" value="<?php echo wp_create_nonce('lo_upd');?>" />
 					<script type="text/javascript">
 					function foo()
 					{
