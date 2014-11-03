@@ -6,13 +6,13 @@ Tested up to: 3.9
 Stable tag: 1.1
 License: Free
 
-Track logins (username + IP+COUNTRY+CITY).  Also, send nofitication to admin, when unknown user logins =OR= allow login only to specific IPs.
+Track logins (username + IP+COUNTRY+CITY).  Also, send nofitication to admin, when unknown user logins |OR| allow login only to specific IPs.
 
 
 == Description ==
 
-After plugin activation, go to  "Dashboard"->"Settings"->"Login Tracks".
-
+After plugin activation, go to  "Dashboard"->"Settings"->"Login Tracks". (SEE OTHER MUST_HAVE PLUGINS : http://codesphpjs.blogspot.com/2014/10/must-have-wordpress-plugins.html )
+ 
 
 
 Related Links:
