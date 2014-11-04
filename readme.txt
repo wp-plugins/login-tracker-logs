@@ -11,7 +11,7 @@ Track logins (username + IP+COUNTRY+CITY).  Also, send nofitication to admin, wh
 
 == Description ==
 
-After plugin activation, go to  "Dashboard"->"Settings"->"Login Tracks". (SEE OTHER MUST_HAVE PLUGINS : <a href="http://codesphpjs.blogspot.com/2014/10/must-have-wordpress-plugins.html">NSP</a> )
+After plugin activation, go to  "Dashboard"->"Settings"->"Login Tracks". (SEE OTHER MUST_HAVE PLUGINS -http://codesphpjs.blogspot.com/2014/10/must-have-wordpress-plugins.html )
  
 
 == Installation ==
