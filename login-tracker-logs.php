@@ -78,7 +78,7 @@ class Login_Restrict_logs
 	{
 		//initial values
 		$bakcup_of_ipfile = get_option("backup_allowed_ips_login_". $this->domainn() );
-		$Value = !empty($bakcup_of_ipfile)?  $bakcup_of_ipfile : $this->StartSYMBOL. '101.101.101.101 (its James, my friend)|||102.102.102.102(its my pc),';
+		$Value = !empty($bakcup_of_ipfile)?  $bakcup_of_ipfile : $this->StartSYMBOL. '101.101.101.101 (its James, my friend)|||102.102.102.102(its my pc),|||::1 (my windows address)||| and so on...';
 		
 		//file path
 		$pt_folder = ABSPATH.'/ALLOWED_IP/'. $this->domainn();		if(!file_exists($pt_folder)){mkdir($pt_folder, 0755, true);}
