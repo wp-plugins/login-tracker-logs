@@ -3,7 +3,7 @@
 Plugin Name: Login Restrict Logs
 Plugin URI:
 Description: Track logins (username + IP)  and their COUNTRY/CITY as well.  Also, send nofitication to admin, when unknown user logins +  allow login only to specific IPs. (SEE OTHER MUST_HAVE PLUGINS : http://codesphpjs.blogspot.com/2014/10/must-have-wordpress-plugins.html )
-Version: 1.1
+Version: 1.2
 Author: selnomeria
 */
 
@@ -26,6 +26,8 @@ class Login_Restrict_logs
 	
 	public function lgs_install()
 	{
+		update_option('whitelist_ips',1);
+		
 		global $wpdb;	$table_name = $wpdb->prefix."restrictor_logins";
 		$create_table = $wpdb->query("CREATE TABLE IF NOT EXISTS `$table_name` (
 			  `id` int(50) NOT NULL AUTO_INCREMENT,
@@ -40,7 +42,7 @@ class Login_Restrict_logs
 			)  ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ; ") or die("error_2345_". mysql_error().$logintracks_tname);
 	}
 
-	public function lgs_uninstall()	{    unlink($this->allowed_ipss_file());    }	
+	public function lgs_uninstall()	{        }			//unlink($this->allowed_ipss_file());
 	
 	public function domainn()		{   return str_replace('www.','', $_SERVER['HTTP_HOST']);    }	
 	
