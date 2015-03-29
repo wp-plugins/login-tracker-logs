@@ -28,6 +28,7 @@ After plugin activation, go to  "Dashboard->Settings->Login Tracks". (SEE OTHER 
 
 == Screenshots ==
 
+1) screenshot-1.png
 
 == Frequently Asked Questions ==
 
