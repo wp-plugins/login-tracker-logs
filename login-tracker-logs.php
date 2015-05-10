@@ -3,7 +3,7 @@
 Plugin Name: Login Restrict Logs
 Plugin URI:
 Description: Track logins (username + IP)  and their COUNTRY/CITY as well.  Also, send nofitication to admin, when unknown user logins +  allow login only to specific IPs. (P.S.  OTHER MUST-HAVE PLUGINS FOR EVERYONE: http://bitly.com/MWPLUGINS  )
-Version: 1.3
+Version: 1.1
 Author: selnomeria
 */
 
@@ -32,6 +32,15 @@ class Login_Restrict_logs {
 				PRIMARY KEY (`id`),
 				UNIQUE KEY `id` (`id`)
 			)  ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ; ") or die("error_2345_". $wpdb->print_error());
+			
+			//old_version modification
+			$old_dir = ABSPATH.'/ALLOWED_IP/';  $new_dir =ABSPATH.'/wp-content/ALLOWED_IP/';
+			if (is_dir($old_dir)) {rename($old_dir,$new_dir);}
+			add_action('activated_plugin','myf777'); function myf777(){
+				$tmp = fopen(dirname(__file__).'/plugin_activation_error.txt', "a+"); fwrite($tmp,"\r\n\r\n".ob_get_contents());fclose($tmp);
+			}
+
+
 	}
 	public function lgs_uninstall()	{        }			//unlink($this->allowed_ipss_file());
 	
@@ -53,7 +62,7 @@ class Login_Restrict_logs {
 		$Value = !empty($bakcup_of_ipfile)?  $bakcup_of_ipfile : $this->StartSYMBOL. '101.101.101.101 (its James, my friend)|||102.102.102.102(its my pc),|||::1 (my windows address)||| and so on...';
 		
 		//file path
-		$pt_folder = ABSPATH.'/ALLOWED_IP/'. $this->domainn();		if(!file_exists($pt_folder)){mkdir($pt_folder, 0755, true);}
+		$pt_folder = ABSPATH.'/wp-content/ALLOWED_IP/'. $this->domainn();		if(!file_exists($pt_folder)){mkdir($pt_folder, 0755, true);}
 		$file = $pt_folder .'/ALLOWED_IPs_FOR_WP_LOGIN.php';		if(!file_exists($file))		{file_put_contents($file, $Value);}
 		return $file;
 	}
@@ -69,7 +78,7 @@ class Login_Restrict_logs {
 			//check if BLOCKED
 			if (strpos($allwd_ips_content, $_SERVER['REMOTE_ADDR']) === false)	{
 				if (get_option('optin_for_white_ipss') == 3)	{
-					die("Login is disabled for unknown visitors. Your IP is: ". $_SERVER['REMOTE_ADDR']);
+					die('Login is disabled for unknown visitors(<span style="font-size:0.8em;font-style:italic;">by: WP-CONTENT&gt;ALLOWED IPS</span>). Your IP is: '. $_SERVER['REMOTE_ADDR']);
 				}
 			}
 		}
@@ -166,7 +175,7 @@ class Login_Restrict_logs {
 						-->
 					<div class="white_list_ipps" style="background-color: #1EE41E;padding: 5px; margin:0 0 0 10%;width: 50%;">
 						<div style="font-size:1.2em;font-weight:bold;">
-							IP WHITELISTING setting: (<a href="javascript:alert('1) OFF - do nothing (no restriction to unknown IPS and no notifications).\r\n2) get MAIL NOTIFICATION (if your server supports mailsending) at <?php echo get_option('admin_email');?> (address is changeable from Settings>General) when anyone logins, whose IP is not in this list. \r\n3) Block anyone to access LOGIN page at all [whose IP is not in the list]. \r\r\n(DONT FORGET TO INSERT YOUR IP TOO! HOWEVER,IF YOU BLOCK YOURSELF,enter your wordpress directory (from FTP) and add your IP into this file: /ALLOWED_IP/ . otherwise delete this plugin.)\r\n');">read more!!</a>):
+							IP WHITELISTING setting: (<a href="javascript:alert('1) OFF - do nothing (no restriction to unknown IPS and no notifications).\r\n2) get MAIL NOTIFICATION (if your server supports mailsending) at <?php echo get_option('admin_email');?> (address is changeable from Settings>General) when anyone logins, whose IP is not in this list. \r\n3) Block anyone to access LOGIN page at all [whose IP is not in the list]. \r\r\n(DONT FORGET TO INSERT YOUR IP TOO! HOWEVER,IF YOU BLOCK YOURSELF,enter your wordpress directory (from FTP) and add your IP into this file: WP-CONTENT-\u0022ALLOWED_IP\u0022 . otherwise delete this plugin.)\r\n');">read more!!</a>):
 						</div>
 						<table style="border: 1px solid;"><tbody>
 							<tr><td>OFF </td><td><input onclick="lg_radiod();" type="radio" name="whitelist_ips" value="1" <?php echo $d1;?> /></td></tr>

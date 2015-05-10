@@ -2,17 +2,21 @@
 Contributors: selnomeria
 Tags: track, login, attempt, ip, attempts, logins, restrict, disable
 Requires at least: 3.0
+<<<<<<< .mine
+Tested up to: 4.2 
+=======
 Tested up to: 3.9 
+>>>>>>> .r1157319
 Stable tag: 1.1
 License: Free
 
 Track logins (username + IP+COUNTRY+CITY).  Also, send nofitication to admin, when unknown user logins |OR| allow login only to specific IPs.
 
-
 == Description ==
 
-After plugin activation, go to  "Dashboard->Settings->Login Tracks". (P.S.  OTHER MUST-HAVE PLUGINS FOR EVERYONE: http://bitly.com/MWPLUGINS  )
- 
+After plugin activation, go to  "Dashboard->Settings->Login Tracks". 
+
+>  (P.S. Note! This is a <a href="http://codesphpjs.blogspot.com/2014/10/nsp-non-slowing-plugins-for-wordpress.html" target="_blank">Non-Slowing</a> Plugin.  See OTHER MUST-HAVE PLUGINS FOR EVERYONE: http://bitly.com/MWPLUGINS  )
 
 == Installation ==
 
@@ -21,14 +25,16 @@ After plugin activation, go to  "Dashboard->Settings->Login Tracks". (P.S.  OTHE
 
 == Changelog ==
 
-= 1.1.0 =
+= 1.2 =
+* minor updates.
 
+= 1.1 =
 * First release.
 
 
 == Screenshots ==
 
-1. screenshot-1.png
+1. screenshot
 
 == Frequently Asked Questions ==
 
