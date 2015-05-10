@@ -6,12 +6,15 @@ Description: Track logins (username + IP)  and their COUNTRY/CITY as well.  Also
 Version: 1.4
 Author: selnomeria
 */
+if ( ! defined( 'ABSPATH' ) ) exit; //Exit if accessed directly
+
 
 $newlgs= new Login_Restrict_logs;
 class Login_Restrict_logs {
 	protected $whois_site		='http://www.whois.com/whois/';
 	protected $StartSYMBOL		='<?php //';
 	public function __construct()	{
+		add_action( 'activated_plugin', array($this, 'activat_redirect'));
 		register_activation_hook( __FILE__,  array($this, 'lgs_install'));
 		register_deactivation_hook( __FILE__,  array($this, 'lgs_uninstall'));
 		// run it before the headers and cookies are sent
@@ -19,6 +22,7 @@ class Login_Restrict_logs {
 		//add page under SETTINGS
 		add_action('admin_menu', array($this, 'logintrackss_funcct') ); 
 	}
+	public function activat_redirect( $plugin ) { if( $plugin == plugin_basename( __FILE__ ) ){ exit( wp_redirect(admin_url( 'admin.php?page=lgs-submenu-page')) ); } }
 	public function lgs_install(){	update_option('whitelist_ips',1); update_option('lgs_enable_WHOIS','no');
 		global $wpdb;	$table_name = $wpdb->prefix."restrictor_logins";
 		$create_table = $wpdb->query("CREATE TABLE IF NOT EXISTS `$table_name` (
@@ -55,8 +59,8 @@ class Login_Restrict_logs {
 		$Value = !empty($bakcup_of_ipfile)?  $bakcup_of_ipfile : $this->StartSYMBOL. '101.101.101.101 (its James, my friend)|||102.102.102.102(its my pc),|||::1 (my windows address)||| and so on...';
 		
 		//file path
-		$pt_folder = ABSPATH.'/wp-content/ALLOWED_IP/'. $this->domainn();		if(!file_exists($pt_folder)){mkdir($pt_folder, 0755, true);}
-		$file = $pt_folder .'/ALLOWED_IPs_FOR_WP_LOGIN.php';		if(!file_exists($file))		{file_put_contents($file, $Value);}
+		$pt_folder = ABSPATH.'/wp-content/ALLOWED_IP/'. $this->domainn();	if(!file_exists($pt_folder)){mkdir($pt_folder, 0755, true);}
+		$file = $pt_folder .'/ALLOWED_IPs_FOR_WP_LOGIN.php';				if(!file_exists($file))		{file_put_contents($file, $Value);}
 		return $file;
 	}
 
