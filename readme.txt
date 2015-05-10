@@ -2,12 +2,8 @@
 Contributors: selnomeria
 Tags: track, login, attempt, ip, attempts, logins, restrict, disable
 Requires at least: 3.0
-<<<<<<< .mine
 Tested up to: 4.2 
-=======
-Tested up to: 3.9 
->>>>>>> .r1157319
-Stable tag: 1.1
+Stable tag: 1.4
 License: Free
 
 Track logins (username + IP+COUNTRY+CITY).  Also, send nofitication to admin, when unknown user logins |OR| allow login only to specific IPs.

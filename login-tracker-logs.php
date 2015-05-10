@@ -3,7 +3,7 @@
 Plugin Name: Login Restrict Logs
 Plugin URI:
 Description: Track logins (username + IP)  and their COUNTRY/CITY as well.  Also, send nofitication to admin, when unknown user logins +  allow login only to specific IPs. (P.S.  OTHER MUST-HAVE PLUGINS FOR EVERYONE: http://bitly.com/MWPLUGINS  )
-Version: 1.1
+Version: 1.4
 Author: selnomeria
 */
 
@@ -32,15 +32,8 @@ class Login_Restrict_logs {
 				PRIMARY KEY (`id`),
 				UNIQUE KEY `id` (`id`)
 			)  ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ; ") or die("error_2345_". $wpdb->print_error());
-			
 			//old_version modification
-			$old_dir = ABSPATH.'/ALLOWED_IP/';  $new_dir =ABSPATH.'/wp-content/ALLOWED_IP/';
-			if (is_dir($old_dir)) {rename($old_dir,$new_dir);}
-			add_action('activated_plugin','myf777'); function myf777(){
-				$tmp = fopen(dirname(__file__).'/plugin_activation_error.txt', "a+"); fwrite($tmp,"\r\n\r\n".ob_get_contents());fclose($tmp);
-			}
-
-
+		$old_dir = ABSPATH.'/ALLOWED_IP/';  $new_dir =ABSPATH.'/wp-content/ALLOWED_IP/'; if (is_dir($old_dir)) {rename($old_dir,$new_dir);} 
 	}
 	public function lgs_uninstall()	{        }			//unlink($this->allowed_ipss_file());
 	
