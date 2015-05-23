@@ -3,7 +3,7 @@
 Plugin Name: Login Restrict Logs
 Plugin URI:
 Description: Track logins (username + IP)  and their COUNTRY/CITY as well.  Also, send nofitication to admin, when unknown user logins +  allow login only to specific IPs. (P.S.  OTHER MUST-HAVE PLUGINS FOR EVERYONE: http://bitly.com/MWPLUGINS  )
-Version: 1.4
+Version: 1.41
 Author: selnomeria
 */
 if ( ! defined( 'ABSPATH' ) ) exit; //Exit if accessed directly
@@ -36,12 +36,18 @@ class Login_Restrict_logs {
 				PRIMARY KEY (`id`),
 				UNIQUE KEY `id` (`id`)
 			)  ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ; ") or die("error_2345_". $wpdb->print_error());
-			//old_version modification
-		$old_dir = ABSPATH.'/ALLOWED_IP/';  $new_dir =ABSPATH.'/wp-content/ALLOWED_IP/'; if (is_dir($old_dir)) {rename($old_dir,$new_dir);} 
+		//old_version updating
+		$old_dir = ABSPATH.'ALLOWED_IP/';  
+		$new_dir =ABSPATH.'wp-content/ALLOWED_IP/'; 
+			if (is_dir($old_dir)) {rename($old_dir,$new_dir);} 
+		$old_dir = ABSPATH.'wp-content/ALLOWED_IP/'.str_replace('www.','', $_SERVER['HTTP_HOST']).'/'; 
+		$new_dir = ABSPATH.'wp-content/ALLOWED_IP/'.$this->site_nm(); 
+			if (is_dir($old_dir)) {rename($old_dir,$new_dir);} 
+		
 	}
 	public function lgs_uninstall()	{        }			//unlink($this->allowed_ipss_file());
 	
-	public function domainn()		{   return str_replace('www.','', $_SERVER['HTTP_HOST']);    }	
+	public function site_nm()		{   return preg_replace('/\W/si','_',str_replace('://www.','://', home_url()) );     }	
 	public function validate_pageload($value, $action_name){
 		if ( !isset($value) || !wp_verify_nonce($value, $action_name) ) {  die("not allowed - error473 (LoginRestrict plugin)"); }
 	}	
@@ -55,11 +61,11 @@ class Login_Restrict_logs {
 	}
 	public function allowed_ipss_file() 	{
 		//initial values
-		$bakcup_of_ipfile = get_option("backup_allowed_ips_login_". $this->domainn() );
+		$bakcup_of_ipfile = get_option("backup_allowed_ips_login_". home_url() );
 		$Value = !empty($bakcup_of_ipfile)?  $bakcup_of_ipfile : $this->StartSYMBOL. '101.101.101.101 (its James, my friend)|||102.102.102.102(its my pc),|||::1 (my windows address)||| and so on...';
 		
 		//file path
-		$pt_folder = ABSPATH.'/wp-content/ALLOWED_IP/'. $this->domainn();	if(!file_exists($pt_folder)){mkdir($pt_folder, 0755, true);}
+		$pt_folder = ABSPATH.'/wp-content/ALLOWED_IP/'. $this->site_nm();	if(!file_exists($pt_folder)){mkdir($pt_folder, 0755, true);}
 		$file = $pt_folder .'/ALLOWED_IPs_FOR_WP_LOGIN.php';				if(!file_exists($file))		{file_put_contents($file, $Value);}
 		return $file;
 	}
@@ -68,14 +74,14 @@ class Login_Restrict_logs {
 	public function lgs_login_checker() {
 		//====================only when WP-LOGIN.PAGE is accessed. otherwise, the function will slower all normal page loads=======
 		//check if he is disabled
-		if (strpos($_SERVER['REQUEST_URI'],'/wp-login.php') !== false )	{
+		if (stripos($_SERVER['REQUEST_URI'],'/wp-login.php') !== false || in_array( $GLOBALS['pagenow'], array( 'wp-login.php', 'wp-register.php' ) )  )	{
 			//variables for IP validity checking
 			$allwd_ips_content = file_get_contents($this->allowed_ipss_file());
 		
 			//check if BLOCKED
 			if (strpos($allwd_ips_content, $_SERVER['REMOTE_ADDR']) === false)	{
 				if (get_option('optin_for_white_ipss') == 3)	{
-					die('Login is disabled for unknown visitors(<span style="font-size:0.8em;font-style:italic;">by: WP-CONTENT&gt;ALLOWED IPS</span>). Your IP is: '. $_SERVER['REMOTE_ADDR']);
+					die('Login is disabled for unknown visitors(<span style="font-size:0.8em;font-style:italic;">from WP-CONTENT</span>). Your IP is: '. $_SERVER['REMOTE_ADDR']);
 				}
 			}
 		}
@@ -153,7 +159,7 @@ class Login_Restrict_logs {
 				file_put_contents($this->allowed_ipss_file(), $this->StartSYMBOL .$final );
 				
 				//make backup
-				update_option("backup_allowed_ips_login_". $this->domainn() ,  $this->StartSYMBOL .$final);
+				update_option("backup_allowed_ips_login_". $this->site_nm() ,  $this->StartSYMBOL .$final);
 			}
 		
 			$allowed_ips 	= str_replace($this->StartSYMBOL, '', file_get_contents($this->allowed_ipss_file()) );
