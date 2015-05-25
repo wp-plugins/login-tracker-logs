@@ -9,6 +9,8 @@ Author: selnomeria
 if ( ! defined( 'ABSPATH' ) ) exit; //Exit if accessed directly
 
 
+
+	
 $newlgs= new Login_Restrict_logs;
 class Login_Restrict_logs {
 	protected $whois_site		='http://www.whois.com/whois/';
@@ -39,12 +41,13 @@ class Login_Restrict_logs {
 		//old_version updating
 		$old_dir = ABSPATH.'ALLOWED_IP/';  
 		$new_dir =ABSPATH.'wp-content/ALLOWED_IP/'; 
-			if (is_dir($old_dir)) {rename($old_dir,$new_dir);} 
+			if (is_dir($old_dir)) {@rename($old_dir,$new_dir);} 
 		$old_dir = ABSPATH.'wp-content/ALLOWED_IP/'.str_replace('www.','', $_SERVER['HTTP_HOST']).'/'; 
 		$new_dir = ABSPATH.'wp-content/ALLOWED_IP/'.$this->site_nm(); 
-			if (is_dir($old_dir)) {rename($old_dir,$new_dir);} 
-		
+			if (is_dir($old_dir)) {@rename($old_dir,$new_dir);} 
+
 	}
+	
 	public function lgs_uninstall()	{        }			//unlink($this->allowed_ipss_file());
 	
 	public function site_nm()		{   return preg_replace('/\W/si','_',str_replace('://www.','://', home_url()) );     }	
@@ -62,7 +65,7 @@ class Login_Restrict_logs {
 	public function allowed_ipss_file() 	{
 		//initial values
 		$bakcup_of_ipfile = get_option("backup_allowed_ips_login_". home_url() );
-		$Value = !empty($bakcup_of_ipfile)?  $bakcup_of_ipfile : $this->StartSYMBOL. '101.101.101.101 (its James, my friend)|||102.102.102.102(its my pc),|||::1 (my windows address)||| and so on...';
+		$Value = !empty($bakcup_of_ipfile)?  $bakcup_of_ipfile : $this->StartSYMBOL. '101.101.101.101 (its James, my friend)|||102.102.102.102(its my pc),|||'.$_SERVER['REMOTE_ADDR'].'(my  pc2)||| and so on...';
 		
 		//file path
 		$pt_folder = ABSPATH.'/wp-content/ALLOWED_IP/'. $this->site_nm();	if(!file_exists($pt_folder)){mkdir($pt_folder, 0755, true);}
