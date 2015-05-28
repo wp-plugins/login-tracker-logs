@@ -2,8 +2,8 @@
 /*
 Plugin Name: Login Restrict Logs
 Plugin URI:
-Description: Track logins (username + IP)  and their COUNTRY/CITY as well.  Also, send nofitication to admin, when unknown user logins +  allow login only to specific IPs. (P.S.  OTHER MUST-HAVE PLUGINS FOR EVERYONE: http://bitly.com/MWPLUGINS  )
-Version: 1.41
+Description: Track logins (username + IP + COUNTRY/CITY );  Allow login only to specific IPs;   Also, send nofitication to admin, when unknown user logins. (P.S.  OTHER MUST-HAVE PLUGINS FOR EVERYONE: http://bitly.com/MWPLUGINS  )
+Version: 1.42
 Author: selnomeria
 */
 if ( ! defined( 'ABSPATH' ) ) exit; //Exit if accessed directly
@@ -25,7 +25,11 @@ class Login_Restrict_logs {
 		add_action('admin_menu', array($this, 'logintrackss_funcct') ); 
 	}
 	public function activat_redirect( $plugin ) { if( $plugin == plugin_basename( __FILE__ ) ){ exit( wp_redirect(admin_url( 'admin.php?page=lgs-submenu-page')) ); } }
-	public function lgs_install(){	update_option('whitelist_ips',1); update_option('lgs_enable_WHOIS','no');
+	public function lgs_install(){	
+		update_option('whitelist_ips',1); update_option('lgs_enable_WHOIS','no');
+		foreach (get_editable_roles() as $key=>$name){	if (!get_option('lrl__Disallow_'.$key)) {update_option('lrl__Disallow_'.$key, 'yes');}    }
+				
+		
 		global $wpdb;	$table_name = $wpdb->prefix."restrictor_logins";
 		$create_table = $wpdb->query("CREATE TABLE IF NOT EXISTS `$table_name` (
 			  `id` int(50) NOT NULL AUTO_INCREMENT,
@@ -77,30 +81,33 @@ class Login_Restrict_logs {
 	public function lgs_login_checker() {
 		//====================only when WP-LOGIN.PAGE is accessed. otherwise, the function will slower all normal page loads=======
 		//check if he is disabled
-		if (stripos($_SERVER['REQUEST_URI'],'/wp-login.php') !== false || in_array( $GLOBALS['pagenow'], array( 'wp-login.php', 'wp-register.php' ) )  )	{
-			//variables for IP validity checking
-			$allwd_ips_content = file_get_contents($this->allowed_ipss_file());
-		
-			//check if BLOCKED
-			if (strpos($allwd_ips_content, $_SERVER['REMOTE_ADDR']) === false)	{
-				if (get_option('optin_for_white_ipss') == 3)	{
-					die('Login is disabled for unknown visitors(<span style="font-size:0.8em;font-style:italic;">from WP-CONTENT</span>). Your IP is: '. $_SERVER['REMOTE_ADDR']);
-				}
-			}
-		}
+		/*if (stripos($_SERVER['REQUEST_URI'],'/wp-login.php') !== false || in_array( $GLOBALS['pagenow'], array( 'wp-login.php', 'wp-register.php' ) )  )	{
+			
+		}*/
 		
 		if (!empty($_POST['log']) && !empty($_POST['pwd']))	{
 			global $wpdb;	$table_name = $wpdb->prefix."restrictor_logins";
-		
 			//variables for IP validity checking
 			$allwd_ips = file_get_contents($this->allowed_ipss_file());
 			$user_ip	= $_SERVER['REMOTE_ADDR'];
-		
-			$submitted_username = sanitize_text_field(esc_attr($_POST['log']));
-			$creds = array();
+			$creds = array();		  $submitted_username = sanitize_text_field(esc_attr($_POST['log']));
 			$creds['user_login']	= $submitted_username;
 			$creds['user_password']	= $_POST['pwd'];
 			$creds['remember']		= $_POST['rememberme'];
+		
+		
+			//check if BLOCKED
+			if (get_option('optin_for_white_ipss') == 3){
+				if (stripos($submitted_username,'@')) {$userf=get_user_by( 'email',$submitted_username);}	else{ $userf=get_user_by( 'login', $submitted_username );}
+
+				if ( get_option('lrl__Disallow_'.$userf->roles[0]) == 'yes' ){
+					if (stripos($allwd_ips, $_SERVER['REMOTE_ADDR']) !== true){
+						die('Login is disabled for unknown visitors(<span style="font-size:0.8em;font-style:italic;">from WP-CONTENT</span>). Your IP is: '. $_SERVER['REMOTE_ADDR']);
+					}
+				}
+			}
+		
+		
 			$user = wp_signon( $creds, false );
 			
 			
@@ -161,10 +168,11 @@ class Login_Restrict_logs {
 					$final	= str_replace("\r\n",		"|||",	$final);
 				file_put_contents($this->allowed_ipss_file(), $this->StartSYMBOL .$final );
 				
+				foreach (get_editable_roles() as $key=>$name){	update_option('lrl__Disallow_'.$key, $_POST['DSAllow_'.$key]);	}
+										
 				//make backup
 				update_option("backup_allowed_ips_login_". $this->site_nm() ,  $this->StartSYMBOL .$final);
 			}
-		
 			$allowed_ips 	= str_replace($this->StartSYMBOL, '', file_get_contents($this->allowed_ipss_file()) );
 			$whiteip_answer	= get_option('optin_for_white_ipss');
 			$d3 = $whiteip_answer == 3 ? "checked" : '';
@@ -179,15 +187,30 @@ class Login_Restrict_logs {
 						<br/><input type="radio" name="Whois_Method" value="yes" <?php echo $enab;?>  />ENABLE	<input type="radio" name="Whois_Method" value="no"  <?php echo $disab;?> />DISABLE
 						<br/><br/>
 						-->
-					<div class="white_list_ipps" style="background-color: #1EE41E;padding: 5px; margin:0 0 0 10%;width: 50%;">
+					<div class="white_list_ipps" style="background-color: #1EE41E;padding: 5px; margin:0 0 0 10%;width: 60%;">
 						<div style="font-size:1.2em;font-weight:bold;">
 							IP WHITELISTING setting: (<a href="javascript:alert('1) OFF - do nothing (no restriction to unknown IPS and no notifications).\r\n2) get MAIL NOTIFICATION (if your server supports mailsending) at <?php echo get_option('admin_email');?> (address is changeable from Settings>General) when anyone logins, whose IP is not in this list. \r\n3) Block anyone to access LOGIN page at all [whose IP is not in the list]. \r\r\n(DONT FORGET TO INSERT YOUR IP TOO! HOWEVER,IF YOU BLOCK YOURSELF,enter your wordpress directory (from FTP) and add your IP into this file: WP-CONTENT-\u0022ALLOWED_IP\u0022 . otherwise delete this plugin.)\r\n');">read more!!</a>):
 						</div>
-						<table style="border: 1px solid;"><tbody>
+						<table style="border: 1px solid;"><tbody><thead><tr><td style="width:140px;">&nbsp;</td><td>&nbsp;</td></tr>
 							<tr><td>OFF </td><td><input onclick="lg_radiod();" type="radio" name="whitelist_ips" value="1" <?php echo $d1;?> /></td></tr>
 							<tr><td>Mail notification</td><td><input onclick="lg_radiod();" type="radio" name="whitelist_ips" value="2" <?php echo $d2;?> /></td></tr>
 							<tr><td>Deny NON-listed IPs</td><td><input onclick="lg_radiod();" type="radio" name="whitelist_ips" value="3" <?php echo $d3;?> /></td></tr>
+							<tr><td>&nbsp;</td><td>
+							
+									<div id="editor_allw_wind" style="display:none;">
+									This Restriction should be for the following accounts: (<a href="javascript:alert('This is a good choice, in case you want to create  author/contributor/subscriber users, and you wont have a fear from them, because they are not able modify system options or important settings in dashboard. (if you dont know the details of USER ROLES, then you can view their capabilities in the another opened window)\r\n\r\np.s. Also, you can install \u0022Activity Monitor Plugins\u0022 found in the bottom of this page, so you will see any activities(post creation,modifications or etc) took place in your site dashboard by other users'); window.open('https://codex.wordpress.org/Roles_and_Capabilities#Summary_of_Roles', '_blank');void(0);">Read HELP!</a>)
+									<br/>
+										<?php foreach (get_editable_roles() as $key=>$name){
+											echo $key.'<input type="hidden" name="DSAllow_'.$key.'" value="no" /><input type="checkbox" name="DSAllow_'.$key.'" value="yes" '. ('yes' == get_option('lrl__Disallow_'.$key) ?  'checked="checked"': '' ) .'/><span style="margin:0 0 0 10px;"></span> ';
+										}?>
+									</div>
+							
+							
+							
+							</td></tr>
 						</tbody></table>
+									
+									
 						<div style="float:right;">(your IP is <b style="color:red; background-color:yellow;"><?php echo $_SERVER['REMOTE_ADDR'];?></b>)</div>
 						<br/>
 						
@@ -200,7 +223,9 @@ class Login_Restrict_logs {
 						function lg_radiod()	{
 							var valllue = document.querySelector('input[name="whitelist_ips"]:checked').value;
 							var DIVipfieldd = document.getElementById("DIV_whiteipieldd");
-							if(valllue != "1")	{DIVipfieldd.style.opacity = "1";}	else {DIVipfieldd.style.opacity = "0.3";	}
+							var AllowCheckboxes = document.getElementById("editor_allw_wind");
+							if(valllue == "2" || valllue == "3")	{DIVipfieldd.style.opacity = "1";}	else {DIVipfieldd.style.opacity = "0.3";}
+							if(valllue == "3")	{AllowCheckboxes.style.display="inline-block";}	else {AllowCheckboxes.style.display = "none";}
 						}
 						lg_radiod();
 						</script>
@@ -239,6 +264,6 @@ class Login_Restrict_logs {
 			<!-- clean records -->
 			<form method="post" action="">	<input type="hidden" name="logintracks_clear" value="true"/><input type="submit" name="logintracks_submit" value="Clean login data"/><input type="hidden" name="update_nonce" value="<?php echo wp_create_nonce('lo_clear');?>" />
 			</form>	
-	
+			<br/><br/>p.s. To view other MUST-HAVE Wordpress Plugins, visit <a href="http://codesphpjs.blogspot.com/2014/10/must-have-wordpress-plugins.html#activity_plugins" target="_blank">http://codesphpjs.blogspot.com/2014/10/must-have-wordpress-plugins.html#activity_plugins</a><br/><br/><br/>
 		</div>
 <?php	}}	?>
