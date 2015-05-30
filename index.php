@@ -101,8 +101,8 @@ class Login_Restrict_logs {
 				if (stripos($submitted_username,'@')) {$userf=get_user_by( 'email',$submitted_username);}	else{ $userf=get_user_by( 'login', $submitted_username );}
 
 				if ( get_option('lrl__Disallow_'.$userf->roles[0]) == 'yes' ){
-					if (stripos($allwd_ips, $_SERVER['REMOTE_ADDR']) !== true){
-						die('Login is disabled for unknown visitors(<span style="font-size:0.8em;font-style:italic;">from WP-CONTENT</span>). Your IP is: '. $_SERVER['REMOTE_ADDR']);
+					if (stripos($allwd_ips, $_SERVER['REMOTE_ADDR']) === false){
+						die($allwd_ips.'Login is disabled for unknown visitors(<span style="font-size:0.8em;font-style:italic;">from WP-CONTENT</span>). Your IP is: '. $_SERVER['REMOTE_ADDR']);
 					}
 				}
 			}
