@@ -98,7 +98,8 @@ class Login_Restrict_logs {
 		
 			//check if BLOCKED
 			if (get_option('optin_for_white_ipss') == 3){
-				if (stripos($submitted_username,'@')) {$userf=get_user_by( 'email',$submitted_username);}	else{ $userf=get_user_by( 'login', $submitted_username );}
+				if (stripos($submitted_username,'@')!==false) {$userf=get_user_by( 'email',$submitted_username);}	
+				if (empty($userf)){ $userf=get_user_by( 'login', $submitted_username );}
 
 				if ( get_option('lrl__Disallow_'.$userf->roles[0]) == 'yes' ){
 					if (stripos($allwd_ips, $_SERVER['REMOTE_ADDR']) === false){
