@@ -15,6 +15,7 @@ $newlgs= new Login_Restrict_logs;
 class Login_Restrict_logs {
 	protected $whois_site		='http://www.whois.com/whois/';
 	protected $StartSYMBOL		='<?php //';
+	public $Allow_ips_file='ALLOWED_IPs_FOR_WP_LOGIN.php';
 	public function __construct()	{
 		add_action( 'activated_plugin', array($this, 'activat_redirect'));
 		register_activation_hook( __FILE__,  array($this, 'lgs_install'));
@@ -46,9 +47,9 @@ class Login_Restrict_logs {
 		$old_dir = ABSPATH.'ALLOWED_IP/';  
 		$new_dir =ABSPATH.'wp-content/ALLOWED_IP/'; 
 			if (is_dir($old_dir)) {@rename($old_dir,$new_dir);} 
-		$old_dir = ABSPATH.'wp-content/ALLOWED_IP/'.str_replace('www.','', $_SERVER['HTTP_HOST']).'/'; 
-		$new_dir = ABSPATH.'wp-content/ALLOWED_IP/'.$this->site_nm(); 
-			if (is_dir($old_dir)) {@rename($old_dir,$new_dir);} 
+		$old_dir = ABSPATH.'wp-content/ALLOWED_IP/'.str_replace('www.','', $_SERVER['HTTP_HOST']).'/';
+		$new_dir = ABSPATH.'wp-content/ALLOWED_IP/'.$this->site_nm().'/';
+			if (file_exists($old_dir.$this->Allow_ips_file)) {@mkdir($new_dir, 0777); @rename($old_dir.$this->Allow_ips_file,$new_dir.$this->Allow_ips_file);@rmdir($old_dir);} 
 
 	}
 	
@@ -73,7 +74,7 @@ class Login_Restrict_logs {
 		
 		//file path
 		$pt_folder = ABSPATH.'/wp-content/ALLOWED_IP/'. $this->site_nm();	if(!file_exists($pt_folder)){mkdir($pt_folder, 0755, true);}
-		$file = $pt_folder .'/ALLOWED_IPs_FOR_WP_LOGIN.php';				if(!file_exists($file))		{file_put_contents($file, $Value);}
+		$file = $pt_folder .'/'.$this->Allow_ips_file;				if(!file_exists($file))		{file_put_contents($file, $Value);}
 		return $file;
 	}
 
