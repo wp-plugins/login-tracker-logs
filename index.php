@@ -44,13 +44,11 @@ class Login_Restrict_logs {
 				UNIQUE KEY `id` (`id`)
 			)  ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ; ") or die("error_2345_". $wpdb->print_error());
 		//old_version updating
-		$old_dir = ABSPATH.'ALLOWED_IP/';  
-		$new_dir =ABSPATH.'wp-content/ALLOWED_IP/'; 
-			if (is_dir($old_dir)) {@rename($old_dir,$new_dir);} 
-		$old_dir = ABSPATH.'wp-content/ALLOWED_IP/'.str_replace('www.','', $_SERVER['HTTP_HOST']).'/';
-		$new_dir = ABSPATH.'wp-content/ALLOWED_IP/'.$this->site_nm().'/';
+		$new_dir =ABSPATH.'wp-content/ALLOWED_IP/'.$this->site_nm().'/'; 
+		$old_dir =ABSPATH.'ALLOWED_IP/'.str_replace('www.','', $_SERVER['HTTP_HOST']).'/';
 			if (file_exists($old_dir.$this->Allow_ips_file)) {@mkdir($new_dir, 0777); @rename($old_dir.$this->Allow_ips_file,$new_dir.$this->Allow_ips_file);@rmdir($old_dir);} 
-
+		$old_dir = ABSPATH.'wp-content/ALLOWED_IP/'.str_replace('www.','', $_SERVER['HTTP_HOST']).'/';
+			if (file_exists($old_dir.$this->Allow_ips_file)) {@mkdir($new_dir, 0777); @rename($old_dir.$this->Allow_ips_file,$new_dir.$this->Allow_ips_file);@rmdir($old_dir);} 
 	}
 	
 	public function lgs_uninstall()	{        }			//unlink($this->allowed_ipss_file());
