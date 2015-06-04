@@ -3,7 +3,7 @@
 Plugin Name: Login Restrict Logs
 Plugin URI:
 Description: Track logins (username + IP + COUNTRY/CITY );  Allow login only to specific IPs;   Also, send nofitication to admin, when unknown user logins. (P.S.  OTHER MUST-HAVE PLUGINS FOR EVERYONE: http://bitly.com/MWPLUGINS  )
-Version: 1.42
+Version: 1.43
 Author: selnomeria
 */
 if ( ! defined( 'ABSPATH' ) ) exit; //Exit if accessed directly
@@ -13,9 +13,11 @@ if ( ! defined( 'ABSPATH' ) ) exit; //Exit if accessed directly
 	
 $newlgs= new Login_Restrict_logs;
 class Login_Restrict_logs {
-	protected $whois_site		='http://www.whois.com/whois/';
-	protected $StartSYMBOL		='<?php //';
-	public $Allow_ips_file='ALLOWED_IPs_FOR_WP_LOGIN.php';
+	protected $whois_site	='http://www.whois.com/whois/';
+	protected $StartSYMBOL	='<?php ZZZ //';
+	public $Allow_ips_file	='ALLOWED_IPs_FOR_WP_LOGIN.php';
+	public $plugin_pageslug	='lgs-submenu-page';
+	
 	public function __construct()	{
 		add_action( 'activated_plugin', array($this, 'activat_redirect'));
 		register_activation_hook( __FILE__,  array($this, 'lgs_install'));
@@ -25,7 +27,7 @@ class Login_Restrict_logs {
 		//add page under SETTINGS
 		add_action('admin_menu', array($this, 'logintrackss_funcct') ); 
 	}
-	public function activat_redirect( $plugin ) { if( $plugin == plugin_basename( __FILE__ ) ){ exit( wp_redirect(admin_url( 'admin.php?page=lgs-submenu-page')) ); } }
+	public function activat_redirect( $plugin ) { if( $plugin == plugin_basename( __FILE__ ) ){ exit( wp_redirect(admin_url( 'admin.php?page='.$this->plugin_pageslug)) ); } }
 	public function lgs_install(){	
 		update_option('whitelist_ips',1); update_option('lgs_enable_WHOIS','no');
 		foreach (get_editable_roles() as $key=>$name){	if (!get_option('lrl__Disallow_'.$key)) {update_option('lrl__Disallow_'.$key, 'yes');}    }
@@ -66,13 +68,15 @@ class Login_Restrict_logs {
 		$data = curl_exec($c);							curl_close($c);		return $data;
 	}
 	public function allowed_ipss_file() 	{
-		//initial values
-		$bakcup_of_ipfile = get_option("backup_allowed_ips_login_". home_url() );
-		$Value = !empty($bakcup_of_ipfile)?  $bakcup_of_ipfile : $this->StartSYMBOL. '101.101.101.101 (its James, my friend)|||102.102.102.102(its my pc),|||'.$_SERVER['REMOTE_ADDR'].'(my  pc2)||| and so on...';
 		
 		//file path
 		$pt_folder = ABSPATH.'/wp-content/ALLOWED_IP/'. $this->site_nm();	if(!file_exists($pt_folder)){mkdir($pt_folder, 0755, true);}
-		$file = $pt_folder .'/'.$this->Allow_ips_file;				if(!file_exists($file))		{file_put_contents($file, $Value);}
+		$file = $pt_folder .'/'.$this->Allow_ips_file;				
+				if(!file_exists($file))		{
+						//initial values
+						$bakcup_of_ipfile = get_option("backup_ips_".$this->plugin_pageslug.'___'. $this->site_nm() );
+					file_put_contents($file, (!empty($bakcup_of_ipfile)?  $bakcup_of_ipfile : $this->StartSYMBOL. '101.101.101.101 (its James, my friend)|||102.102.102.102(its my pc),|||'.$_SERVER['REMOTE_ADDR'].'(my another pc2)||| and so on...') );
+				}
 		return $file;
 	}
 
@@ -101,8 +105,9 @@ class Login_Restrict_logs {
 				if (empty($userf)){ $userf=get_user_by( 'login', $submitted_username );}
 
 				if ( get_option('lrl__Disallow_'.$userf->roles[0]) == 'yes' ){
-					if (stripos($allwd_ips, $_SERVER['REMOTE_ADDR']) === false){
-						die($allwd_ips.'Login is disabled for unknown visitors(<span style="font-size:0.8em;font-style:italic;">from WP-CONTENT</span>). Your IP is: '. $_SERVER['REMOTE_ADDR']);
+						$IP = $_SERVER['REMOTE_ADDR'];  $IPx= preg_replace('/(.*?)\.(.*?)\.(.*?)\.(.*)/si','$1.$2.$3.'.'*', $_SERVER['REMOTE_ADDR']);
+					if (stripos($allwd_ips, $IP ) === false  &&   stripos($allwd_ips,  $IPx) === false  ){ 
+						die('Login is disabled for unknown visitors(<span style="font-size:0.8em;font-style:italic;">from /WP-CONTENT---ALLOWED-IP/</span>). Your IP is: '. $_SERVER['REMOTE_ADDR']);
 					}
 				}
 			}
@@ -129,7 +134,7 @@ class Login_Restrict_logs {
 					if (get_option('optin_for_white_ipss') == 2){
 						$admin_mail	= get_option('admin_email');
 						$subjectt	="UNKNOWN IP($user_ip) has logged into ".home_url()." ";
-						$full_messag="\r\n\r\n Someone with an IP $user_ip (COUNTRY:$ip_country) has logged into your site. \r\n\r\n (if you know him, you can add him to whitelist: " . admin_url('options-general.php?page=lgs-submenu-page') ;
+						$full_messag="\r\n\r\n Someone with an IP $user_ip (COUNTRY:$ip_country) has logged into your site. \r\n\r\n (if you know him, you can add him to whitelist: " . admin_url('options-general.php?page='.$this->plugin_pageslug) ;
 						// To send HTML mail, the Content-type header must be set
 						$headers  = "MIME-Version: 1.0\r\nContent-type: text/html\r\nFrom: LOGIN RESTRICT <noreply@noreply.com>\r\nReply-To: noreply@noreply.com\r\nX-Mailer: PHP/".phpversion();
 
@@ -144,7 +149,7 @@ class Login_Restrict_logs {
 	}
 
 
-	public function logintrackss_funcct()	{ add_submenu_page('options-general.php','LOGIN Restricts','LOGIN Restricts', 'manage_options' ,'lgs-submenu-page', array($this, 'lgs_page_callback') );}public function lgs_page_callback(){ 
+	public function logintrackss_funcct()	{ add_submenu_page('options-general.php','LOGIN Restricts','LOGIN Restricts', 'manage_options' ,$this->plugin_pageslug, array($this, 'lgs_page_callback') );}public function lgs_page_callback(){ 
 		global $wpdb;	$table_name = $wpdb->prefix . "restrictor_logins";
 		//if records cleared
 		if (!empty($_POST['logintracks_clear'])) {
@@ -163,15 +168,14 @@ class Login_Restrict_logs {
 
 				update_option('optin_for_white_ipss',$_POST['whitelist_ips']);
 				//change IP file
-					$final	= $_POST['white_IPS'];
+					$final	= $_POST['lgs_white_IPS'];
 					$final	= str_replace("\r\n\r\n",	"",		$final);
 					$final	= str_replace("\r\n",		"|||",	$final);
 				file_put_contents($this->allowed_ipss_file(), $this->StartSYMBOL .$final );
+					update_option("backup_ips_".$this->plugin_pageslug.'___'. $this->site_nm() ,  $this->StartSYMBOL .$final);
 				
 				foreach (get_editable_roles() as $key=>$name){	update_option('lrl__Disallow_'.$key, $_POST['DSAllow_'.$key]);	}
 										
-				//make backup
-				update_option("backup_allowed_ips_login_". $this->site_nm() ,  $this->StartSYMBOL .$final);
 			}
 			$allowed_ips 	= str_replace($this->StartSYMBOL, '', file_get_contents($this->allowed_ipss_file()) );
 			$whiteip_answer	= get_option('optin_for_white_ipss');
@@ -216,7 +220,10 @@ class Login_Restrict_logs {
 						
 						<div id="DIV_whiteipieldd" style="overflow-y:auto;">
 							<?php	$liness=explode("|||",$allowed_ips);	?>
-							<textarea id="whiteips_fieldd" style="width:100%;height:300px;" name="white_IPS"><?php foreach ($liness as $line) {echo $line."\r\n";}?></textarea>
+							<textarea id="whiteips_fieldd" style="width:100%;height:300px;" name="lgs_white_IPS"><?php foreach ($liness as $line) {echo $line."\r\n";}?></textarea>
+							<div style="float:right;">
+								1)<a href="javascript:alert('You can insert Asterisk IP instead of last 3 chars. For example:\r\n 111.111.111.*');">Adding Variable IP</a>
+							</div>
 						</div>
 						
 						<script type="text/javascript">
