@@ -222,7 +222,7 @@ class Login_Restrict_logs {
 							<?php	$liness=explode("|||",$allowed_ips);	?>
 							<textarea id="whiteips_fieldd" style="width:100%;height:300px;" name="lgs_white_IPS"><?php foreach ($liness as $line) {echo $line."\r\n";}?></textarea>
 							<div style="float:right;">
-								1)<a href="javascript:alert('You can insert Asterisk IP instead of last 3 chars. For example:\r\n 111.111.111.*');">Adding Variable IP</a>
+								1)<a href="javascript:alert('You can insert Asterisk IP instead of last 3 chars. For example:\r\n 111.111.111.*\r\n\r\n\r\np.s.In case you dont like this plugin, you may need something \u0022login attempt blocker\u0022 plugins (For example, \u0022Wordfence Security\u0022,\u0022Brute force login protection\u0022,\u0022Login Protection\u0022 or etc...)');">Adding Variable IP</a>
 							</div>
 						</div>
 						
@@ -240,7 +240,6 @@ class Login_Restrict_logs {
 						<div style="clear:both;"></div>
 						<input type="submit"  value="SAVE" onclick="return foo23();" />
 						<input type="hidden" name="update_ips" value="<?php echo wp_create_nonce('lo_upd');?>" />
-						<br/>p.s. This plugin is good with <b>login attempt blockers</b>, like "Brute force login protection" or "Login Protection".
 						<br/>
 					</div>
 					<script type="text/javascript">
