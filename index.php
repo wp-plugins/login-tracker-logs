@@ -3,7 +3,7 @@
 Plugin Name: Login Restrict Logs
 Plugin URI:
 Description: Track logins (username + IP + COUNTRY/CITY );  Allow login only to specific IPs;   Also, send nofitication to admin, when unknown user logins. (P.S.  OTHER MUST-HAVE PLUGINS FOR EVERYONE: http://bitly.com/MWPLUGINS  )
-Version: 1.43
+Version: 1.44
 Author: selnomeria
 */
 if ( ! defined( 'ABSPATH' ) ) exit; //Exit if accessed directly
@@ -26,6 +26,7 @@ class Login_Restrict_logs {
 		add_action( 'after_setup_theme', array($this, 'lgs_login_checker'));
 		//add page under SETTINGS
 		add_action('admin_menu', array($this, 'logintrackss_funcct') ); 
+		add_action('init', array($this, 'logintrackss_checkip') ); 
 	}
 	public function activat_redirect( $plugin ) { if( $plugin == plugin_basename( __FILE__ ) ){ exit( wp_redirect(admin_url( 'admin.php?page='.$this->plugin_pageslug)) ); } }
 	public function lgs_install(){	
@@ -80,7 +81,36 @@ class Login_Restrict_logs {
 		return $file;
 	}
 
+	public function logintrackss_checkip(){
+		if(is_admin()){
+			if (is_user_logged_in()){
+				require_once(ABSPATH . 'wp-includes/pluggable.php'); $usID= get_current_user_id();		$user_info= get_userdata($usID);
+				$this->checkDef($user_info->user_login);
+			}
+		}
+	}
+	
+	public function checkDef($submitted_username){		
+		//check if BLOCKED
+		$allwd_ips = file_get_contents($this->allowed_ipss_file());
+		if (get_option('optin_for_white_ipss') == 3){
+			if (stripos($submitted_username,'@')!==false) {$userf=get_user_by( 'email',$submitted_username);}	
+			if (empty($userf)){ $userf=get_user_by( 'login', $submitted_username );}
 
+			if ( get_option('lrl__Disallow_'.$userf->roles[0]) != 'no' ){
+					$IP = $_SERVER['REMOTE_ADDR'];  $IPx= preg_replace('/(.*?)\.(.*?)\.(.*?)\.(.*)/si','$1.$2.$3.'.'*', $_SERVER['REMOTE_ADDR']);
+				if (stripos($allwd_ips, $IP ) === false  &&   stripos($allwd_ips,  $IPx) === false  ){ 
+					die('Login is disabled for unknown visitors(<span style="font-size:0.8em;font-style:italic;">from /WP-CONTENT---ALLOWED-IP/</span>). Your IP is: '. $_SERVER['REMOTE_ADDR']);
+				}
+			}
+		}
+	}
+	
+	
+	
+	
+	
+	
 	public function lgs_login_checker() {
 		//====================only when WP-LOGIN.PAGE is accessed. otherwise, the function will slower all normal page loads=======
 		//check if he is disabled
@@ -91,27 +121,13 @@ class Login_Restrict_logs {
 		if (!empty($_POST['log']) && !empty($_POST['pwd']))	{
 			global $wpdb;	$table_name = $wpdb->prefix."restrictor_logins";
 			//variables for IP validity checking
-			$allwd_ips = file_get_contents($this->allowed_ipss_file());
 			$user_ip	= $_SERVER['REMOTE_ADDR'];
 			$creds = array();		  $submitted_username = sanitize_text_field(esc_attr($_POST['log']));
 			$creds['user_login']	= $submitted_username;
 			$creds['user_password']	= $_POST['pwd'];
 			$creds['remember']		= $_POST['rememberme'];
 		
-		
-			//check if BLOCKED
-			if (get_option('optin_for_white_ipss') == 3){
-				if (stripos($submitted_username,'@')!==false) {$userf=get_user_by( 'email',$submitted_username);}	
-				if (empty($userf)){ $userf=get_user_by( 'login', $submitted_username );}
-
-				if ( get_option('lrl__Disallow_'.$userf->roles[0]) == 'yes' ){
-						$IP = $_SERVER['REMOTE_ADDR'];  $IPx= preg_replace('/(.*?)\.(.*?)\.(.*?)\.(.*)/si','$1.$2.$3.'.'*', $_SERVER['REMOTE_ADDR']);
-					if (stripos($allwd_ips, $IP ) === false  &&   stripos($allwd_ips,  $IPx) === false  ){ 
-						die('Login is disabled for unknown visitors(<span style="font-size:0.8em;font-style:italic;">from /WP-CONTENT---ALLOWED-IP/</span>). Your IP is: '. $_SERVER['REMOTE_ADDR']);
-					}
-				}
-			}
-		
+			$this->checkDef($submitted_username);
 		
 			$user = wp_signon( $creds, false );
 			
@@ -174,7 +190,7 @@ class Login_Restrict_logs {
 				file_put_contents($this->allowed_ipss_file(), $this->StartSYMBOL .$final );
 					update_option("backup_ips_".$this->plugin_pageslug.'___'. $this->site_nm() ,  $this->StartSYMBOL .$final);
 				
-				foreach (get_editable_roles() as $key=>$name){	update_option('lrl__Disallow_'.$key, $_POST['DSAllow_'.$key]);	}
+				foreach (get_editable_roles() as $key=>$name){	update_option('lrl__Disallow_'.$key, $_POST['ds_Allow_'.$key]);	}
 										
 			}
 			$allowed_ips 	= str_replace($this->StartSYMBOL, '', file_get_contents($this->allowed_ipss_file()) );
@@ -202,10 +218,10 @@ class Login_Restrict_logs {
 							<tr><td>&nbsp;</td><td>
 							
 									<div id="editor_allw_wind" style="display:none;">
-									This Restriction should be for the following accounts: (<a href="javascript:alert('This is a good choice, in case you want to create  author/contributor/subscriber users, and you wont have a fear from them, because they are not able modify system options or important settings in dashboard. (if you dont know the details of USER ROLES, then you can view their capabilities in the another opened window)\r\n\r\np.s. Also, you can install \u0022Activity Monitor Plugins\u0022 found in the bottom of this page, so you will see any activities(post creation,modifications or etc) took place in your site dashboard by other users'); window.open('https://codex.wordpress.org/Roles_and_Capabilities#Summary_of_Roles', '_blank');void(0);">Read HELP!</a>)
+									Avoid Restriction for following accounts: (<a href="javascript:alert('This is a good choice, in case you want to create  author/contributor/subscriber users, and you wont have a fear from them, because they are not able modify system options or important settings in dashboard. (if you dont know the details of USER ROLES, then you can view their capabilities in the another opened window)\r\n\r\np.s. Also, you can install \u0022Activity Monitor Plugins\u0022 found in the bottom of this page, so you will see any activities(post creation,modifications or etc) took place in your site dashboard by other users'); window.open('https://codex.wordpress.org/Roles_and_Capabilities#Summary_of_Roles', '_blank');void(0);">Read HELP!</a>)
 									<br/>
 										<?php foreach (get_editable_roles() as $key=>$name){
-											echo $key.'<input type="hidden" name="DSAllow_'.$key.'" value="no" /><input type="checkbox" name="DSAllow_'.$key.'" value="yes" '. ('yes' == get_option('lrl__Disallow_'.$key) ?  'checked="checked"': '' ) .'/><span style="margin:0 0 0 10px;"></span> ';
+											echo $key.'<input type="hidden" name="ds_Allow_'.$key.'" value="yes" /><input type="checkbox" name="ds_Allow_'.$key.'" value="no" '. ('no' == get_option('lrl__Disallow_'.$key) ?  'checked="checked"': '' ) .'/><span style="margin:0 0 0 10px;"></span> ';
 										}?>
 									</div>
 							
