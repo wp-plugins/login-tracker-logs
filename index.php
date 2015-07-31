@@ -48,15 +48,15 @@ class Login_Restrict_logs {
 			)  ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ; ") or die("error_2345_". $wpdb->print_error());
 		//old_version updating
 		$new_dir =ABSPATH.'wp-content/ALLOWED_IP/'.$this->site_nm().'/'; 
-		$old_dir =ABSPATH.'ALLOWED_IP/'.str_replace('www.','', $_SERVER['HTTP_HOST']).'/';
+		$old_dir =ABSPATH.'ALLOWED_IP/'.str_ireplace('www.','', $_SERVER['HTTP_HOST']).'/';
 			if (file_exists($old_dir.$this->Allow_ips_file)) {@mkdir($new_dir, 0777); @rename($old_dir.$this->Allow_ips_file,$new_dir.$this->Allow_ips_file);@rmdir($old_dir);} 
-		$old_dir = ABSPATH.'wp-content/ALLOWED_IP/'.str_replace('www.','', $_SERVER['HTTP_HOST']).'/';
+		$old_dir = ABSPATH.'wp-content/ALLOWED_IP/'.str_ireplace('www.','', $_SERVER['HTTP_HOST']).'/';
 			if (file_exists($old_dir.$this->Allow_ips_file)) {@mkdir($new_dir, 0777); @rename($old_dir.$this->Allow_ips_file,$new_dir.$this->Allow_ips_file);@rmdir($old_dir);} 
 	}
 	
 	public function lgs_uninstall()	{        }			//unlink($this->allowed_ipss_file());
 	
-	public function site_nm()		{   return preg_replace('/\W/si','_',str_replace('://www.','://', home_url()) );     }	
+	public function site_nm()		{   return preg_replace('/\W/si','_',str_ireplace('://www.','://', home_url()) );     }	
 	public function validate_pageload($value, $action_name){
 		if ( !isset($value) || !wp_verify_nonce($value, $action_name) ) {  die("not allowed - error473 (LoginRestrict plugin)"); }
 	}	
@@ -185,15 +185,15 @@ class Login_Restrict_logs {
 				update_option('optin_for_white_ipss',$_POST['whitelist_ips']);
 				//change IP file
 					$final	= $_POST['lgs_white_IPS'];
-					$final	= str_replace("\r\n\r\n",	"",		$final);
-					$final	= str_replace("\r\n",		"|||",	$final);
+					$final	= str_ireplace("\r\n\r\n",	"",		$final);
+					$final	= str_ireplace("\r\n",		"|||",	$final);
 				file_put_contents($this->allowed_ipss_file(), $this->StartSYMBOL .$final );
 					update_option("backup_ips_".$this->plugin_pageslug.'___'. $this->site_nm() ,  $this->StartSYMBOL .$final);
 				
 				foreach (get_editable_roles() as $key=>$name){	update_option('lrl__Disallow_'.$key, $_POST['ds_Allow_'.$key]);	}
 										
 			}
-			$allowed_ips 	= str_replace($this->StartSYMBOL, '', file_get_contents($this->allowed_ipss_file()) );
+			$allowed_ips 	= str_ireplace($this->StartSYMBOL, '', file_get_contents($this->allowed_ipss_file()) );
 			$whiteip_answer	= get_option('optin_for_white_ipss');
 			$d3 = $whiteip_answer == 3 ? "checked" : '';
 			$d2 = $whiteip_answer == 2 ? "checked" : '';
