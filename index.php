@@ -125,7 +125,7 @@ class Login_Restrict_logs {
 			$creds = array();		  $submitted_username = sanitize_text_field(esc_attr($_POST['log']));
 			$creds['user_login']	= $submitted_username;
 			$creds['user_password']	= $_POST['pwd'];
-			$creds['remember']		= $_POST['rememberme'];
+			$creds['remember']		= $_POST['rememberme'] ? $_POST['rememberme'] : false;
 		
 			$this->checkDef($submitted_username);
 		
