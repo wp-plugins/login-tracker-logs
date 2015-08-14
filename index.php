@@ -125,7 +125,7 @@ class Login_Restrict_logs {
 			$creds = array();		  $submitted_username = sanitize_text_field(esc_attr($_POST['log']));
 			$creds['user_login']	= $submitted_username;
 			$creds['user_password']	= $_POST['pwd'];
-			$creds['remember']		= $_POST['rememberme'] ? $_POST['rememberme'] : false;
+			$creds['remember']		= isset($_POST['rememberme']) ? $_POST['rememberme'] : false;
 		
 			$this->checkDef($submitted_username);
 		
@@ -145,6 +145,7 @@ class Login_Restrict_logs {
 				}
 				$insert = $wpdb->query($wpdb->prepare("INSERT INTO $table_name (username, time,ip,country, success) VALUES (%s, %s, %s, %s, %s)", $submitted_username, current_time('mysql'),$user_ip, $ip_country, 1)); 
 
+				$allwd_ips = file_get_contents($this->allowed_ipss_file());
 				//CHECK IP (BLOCK or Send notification)
 				if (strpos($allwd_ips,$user_ip) === false)	{
 					if (get_option('optin_for_white_ipss') == 2){
